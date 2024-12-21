@@ -7,9 +7,9 @@ services:
     container_name: postgres_container
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: your_password
-      POSTGRES_DB: your_database
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: addamgolik113
+      POSTGRES_DB: go2
     ports:
       - "5432:5432"
     volumes:
@@ -43,7 +43,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: html_frontend
+    container_name: frontend
     restart: always
     ports:
       - "8081:80" # Frontend dostępny na porcie 8081

@@ -1,14 +1,22 @@
-# Wykorzystujemy oficjalny obraz nginx jako bazę
-FROM nginx:alpine
+   FROM node:18
 
-# Usuń domyślne pliki nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Ustaw katalog roboczy
+WORKDIR /app
 
-# Skopiuj plik index.html i inne statyczne pliki (jeśli potrzebne) do serwera nginx
-COPY index.html /usr/share/nginx/html/
+# Skopiuj plik package.json i package-lock.json
+COPY package*.json ./
 
-# Eksponuj port 80
-EXPOSE 80
+# Zainstaluj zależności
+RUN npm install
 
-# Domyślna komenda uruchamiająca serwer nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Skopiuj resztę plików aplikacji
+COPY . .
+
+# Zbuduj aplikację
+RUN npm run build
+
+# Eksponuj port
+EXPOSE 3000
+
+# Uruchom serwer Next.js
+CMD ["npm", "run", "start"]
