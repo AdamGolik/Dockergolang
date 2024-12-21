@@ -3,6 +3,7 @@ package main
 import (
 	"awesomeProject12/Controller"
 	"awesomeProject12/initializers"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,6 +23,13 @@ func init() {
 func main() {
 	//creating server default
 	r := gin.Default()
+	// Middleware CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // Pozwól na żądania z dowolnego źródła
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}))
 	//all the methods
 	//GET METHOD
 	//GET ALL USERS
