@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Baza danych PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: postgres_container
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: your_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  # Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: go_backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: adamgolik113
+      DB_NAME: go2
+      SECRET_KEY: qzawxsecdrvftbgyhnujimko,1234567890-=
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: html_frontend
+    restart: always
+    ports:
+      - "8081:80" # Frontend dostępny na porcie 8081
+    depends_on:
+      - backend
+    networks:
+      - app_network
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
