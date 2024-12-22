@@ -1,29 +1,37 @@
-"use client"
+"use client";
+
 import { useState, useEffect } from "react";
 import sha256 from "crypto-js/sha256";
-import {GetAllData} from "@/components/GetAllData";
-export const dynamic = 'force-dynamic'
-export default function Home({ params }: { params: any }) {
-    const [user, setUser] = useState<any>(null); // Przechowuje dane użytkownika
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-    const [id, setId] = useState<string | null>(null);
-    const [isEditing, setIsEditing] = useState<boolean>(false);
-    const [editedUser, setEditedUser] = useState<any>(null);
+import { GetAllData } from "@/components/GetAllData";
+
+export const dynamic = "force-dynamic";
+
+type User = {
+    telephone: number;
+    username: string;
+    age: number;
+    last_name: string;
+    id: bigint;
+    name: string;
+    lastName: string;
+    email: string;
+    password: string;
+};
+
+export default function Home({ params }: { params: { id: string } }) {
+    const { id } = params; // Pobranie ID z parametrów
+    const [user, setUser] = useState<User | null>(null); // Stan użytkownika
+    const [loading, setLoading] = useState<boolean>(true); // Stan ładowania
+    const [error, setError] = useState<string | null>(null); // Stan błędów
+    const [isEditing, setIsEditing] = useState<boolean>(false); // Tryb edycji
+    const [editedUser, setEditedUser] = useState<User | null>(null); // Stan edytowanego użytkownika
 
     useEffect(() => {
-        async function unwrapParams() {
-            const { id } = await params;
-            setId(id); // Ustaw id po rozpakowaniu
-        }
-        unwrapParams();
-    }, [params]);
-
-    useEffect(() => {
-        if (!id) return;
+        if (!id) return; // Sprawdź, czy ID jest dostępne
         fetchData(); // Pobierz dane użytkownika
     }, [id]);
 
+    // Funkcja pobierająca dane użytkownika z API
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -31,8 +39,8 @@ export default function Home({ params }: { params: any }) {
             if (!response.ok) throw new Error("Failed to fetch user data");
 
             const data = await response.json();
-            data.user.password = fakeDecryptPassword(data.user.password); // Symulujemy odszyfrowanie hasła
-            setUser(data.user);
+            data.user.password = "********"; // Placeholder dla hasła
+            setUser(data.user); // Ustaw dane użytkownika
         } catch (err: any) {
             setError(err.message || "Unknown error occurred");
         } finally {
@@ -40,13 +48,8 @@ export default function Home({ params }: { params: any }) {
         }
     };
 
-    // "Symulacja odszyfrowania" hasła do prezentacji
-    const fakeDecryptPassword = (hashedPassword: string): string => {
-        return "********"; // Zwraca placeholder zamiast odszyfrowywać hasło
-    };
-
+    // Funkcja do usunięcia użytkownika
     const handleDelete = async () => {
-        if (!id) return;
         try {
             const response = await fetch(`http://localhost:8080/${id}`, {
                 method: "DELETE",
@@ -54,23 +57,27 @@ export default function Home({ params }: { params: any }) {
             if (!response.ok) throw new Error("Failed to delete user");
             alert("User deleted successfully!");
             setUser(null);
-            window.location.href = `/`; // Przekierowuje na stronę główną
+            window.location.href = `/`; // Przekierowanie na stronę główną
         } catch (err: any) {
             alert(err.message || "Failed to delete user");
         }
     };
 
+    // Funkcja aktywująca tryb edycji
     const handleEdit = () => {
-        setIsEditing(true); // Aktywacja trybu edycji
-        setEditedUser({ ...user }); // Kopia danych użytkownika do formularza
+        setIsEditing(true);
+        setEditedUser(user); // Skopiuj dane użytkownika
     };
 
+    // Funkcja zapisująca zmiany w danych użytkownika
     const handleSave = async () => {
+        if (!editedUser) return;
         try {
-            // Jeśli hasło zostało zmienione, zhashuj je przed wysłaniem
+            // Hashowanie hasła, jeśli zostało zmienione
             if (editedUser.password !== "********") {
-                editedUser.password = sha256(editedUser.password).toString(); // Hashowanie hasła
+                editedUser.password = sha256(editedUser.password).toString();
             }
+
             const response = await fetch(`http://localhost:8080/${id}`, {
                 method: "PUT",
                 headers: {
@@ -87,19 +94,32 @@ export default function Home({ params }: { params: any }) {
         }
     };
 
+    // Funkcja obsługująca zmiany w formularzu edycji
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setEditedUser((prev: any) => ({ ...prev, [name]: value })); // Aktualizacja danych formularza
+        setEditedUser((prev) => (prev ? { ...prev, [name]: value } : null));
     };
 
-    if (loading || !id)
-        return <div className="text-center text-gray-700 animate-pulse text-xl mt-10">Loading user...</div>;
+    if (loading)
+        return (
+                <div className="text-center text-gray-700 animate-pulse text-xl mt-10">
+                    Loading user...
+                </div>
+        );
 
     if (error)
-        return <div className="text-center text-red-600 text-xl mt-10">Error: {error}</div>;
+        return (
+                <div className="text-center text-red-600 text-xl mt-10">
+                    Error: {error}
+                </div>
+        );
 
     if (!user)
-        return <div className="text-center text-gray-500 text-xl mt-10">No user data available.</div>;
+        return (
+                <div className="text-center text-gray-500 text-xl mt-10">
+                    User not found.
+                </div>
+        );
 
     return (
             <>
@@ -137,7 +157,7 @@ export default function Home({ params }: { params: any }) {
                                             <input
                                                     type="text"
                                                     name="name"
-                                                    value={editedUser.name}
+                                                    value={editedUser?.name || ""}
                                                     onChange={handleInputChange}
                                                     className="w-full p-2 border rounded-lg"
                                             />
@@ -147,7 +167,7 @@ export default function Home({ params }: { params: any }) {
                                             <input
                                                     type="text"
                                                     name="last_name"
-                                                    value={editedUser.last_name}
+                                                    value={editedUser?.last_name || ""}
                                                     onChange={handleInputChange}
                                                     className="w-full p-2 border rounded-lg"
                                             />
@@ -157,7 +177,7 @@ export default function Home({ params }: { params: any }) {
                                             <input
                                                     type="number"
                                                     name="age"
-                                                    value={editedUser.age}
+                                                    value={editedUser?.age || ""}
                                                     onChange={handleInputChange}
                                                     className="w-full p-2 border rounded-lg"
                                             />
@@ -167,7 +187,7 @@ export default function Home({ params }: { params: any }) {
                                             <input
                                                     type="email"
                                                     name="email"
-                                                    value={editedUser.email}
+                                                    value={editedUser?.email || ""}
                                                     onChange={handleInputChange}
                                                     className="w-full p-2 border rounded-lg"
                                             />
@@ -177,7 +197,7 @@ export default function Home({ params }: { params: any }) {
                                             <input
                                                     type="text"
                                                     name="telephone"
-                                                    value={editedUser.telephone}
+                                                    value={editedUser?.telephone || ""}
                                                     onChange={handleInputChange}
                                                     className="w-full p-2 border rounded-lg"
                                             />
@@ -187,7 +207,7 @@ export default function Home({ params }: { params: any }) {
                                             <input
                                                     type="text"
                                                     name="username"
-                                                    value={editedUser.username}
+                                                    value={editedUser?.username || ""}
                                                     onChange={handleInputChange}
                                                     className="w-full p-2 border rounded-lg"
                                             />
@@ -197,7 +217,7 @@ export default function Home({ params }: { params: any }) {
                                             <input
                                                     type="password"
                                                     name="password"
-                                                    value={editedUser.password}
+                                                    value={editedUser?.password || ""}
                                                     onChange={handleInputChange}
                                                     className="w-full p-2 border rounded-lg"
                                             />
@@ -250,5 +270,5 @@ export default function Home({ params }: { params: any }) {
                     </div>
                 </div>
             </>
-                );
-                }
+    );
+}
