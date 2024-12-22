@@ -41,14 +41,14 @@ services:
   # Frontend
   frontend:
     build:
-      context: ./frontend          # Katalog frontendu, gdzie znajduje się Dockerfile
-      dockerfile: Dockerfile       # Plik Dockerfile w katalogu frontendu
-    container_name: frontend_container
-    restart: always
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "8081:3000"                # Port 3000 dla aplikacji React (Next.js)
-    networks:
-      - app_network
+      - "3000:3000" # Mapowanie portów host:kontener
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://backend:8080
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
