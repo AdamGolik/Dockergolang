@@ -41,15 +41,15 @@ services:
   # Frontend
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ./frontend          # Katalog frontendu, gdzie znajduje się Dockerfile
+      dockerfile: Dockerfile       # Plik Dockerfile w katalogu frontendu
+    container_name: frontend_container
+    restart: always
     ports:
-      - "8081:80"
-    volumes:
-      - ./frontend:/app
-    stdin_open: true
-    tty: true
-    #app
+      - "8081:3000"                # Port 3000 dla aplikacji React (Next.js)
+    networks:
+      - app_network
+
 volumes:
   postgres_data:
 
