@@ -1,131 +1,122 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 
-function AddUserForm({onUserAdded}) {
+function AddUserForm({ onUserAdded }) {
     const [formData, setFormData] = useState({
         name: "",
         last_name: "",
         age: "",
         email: "",
         username: "",
+        telephone: "",
         password: "",
-        telephone: ""
     });
 
     const handleChange = (e) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData({
             ...formData,
-            [name]: value
+            [name]: value,
         });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            const response = await fetch("http://localhost:8080", {
+            const response = await fetch("http://localhost:8080/", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    name: formData.name,
-                    last_name: formData.last_name,
-                    age: parseInt(formData.age),
-                    email: formData.email,
-                    username: formData.username,
-                    password: formData.password,
-                    telephone: formData.telephone
-                })
+                body: JSON.stringify(formData),
             });
-
             if (response.ok) {
-                alert("Użytkownik został dodany pomyślnie!");
+                onUserAdded();
                 setFormData({
                     name: "",
                     last_name: "",
                     age: "",
                     email: "",
                     username: "",
+                    telephone: "",
                     password: "",
-                    telephone: ""
                 });
-                onUserAdded(); // Informuje rodzica o dodaniu użytkownika
             } else {
-                alert("Wystąpił błąd podczas dodawania użytkownika.");
+                alert("Nie udało się dodać użytkownika.");
             }
         } catch (error) {
             console.error("Błąd:", error);
-            alert("Wystąpił błąd podczas komunikacji z serwerem.");
         }
     };
 
     return (
-            <form
+            <motion.form
                     onSubmit={handleSubmit}
-                    className="max-w-lg mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 space-y-4"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="bg-white shadow-lg rounded-lg p-6"
             >
-                <h2 className="text-lg font-bold mb-6 text-center">Dodaj nowego użytkownika</h2>
-
-                {/* Pola formularza */}
-                <input
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                        placeholder="Imię"
-                />
-                <input
-                        name="last_name"
-                        value={formData.last_name}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                        placeholder="Nazwisko"
-                />
-                <input
-                        name="age"
-                        type="number"
-                        value={formData.age}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                        placeholder="Wiek"
-                />
-                <input
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                        placeholder="Email"
-                />
-                <input
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                        placeholder="Nazwa użytkownika"
-                />
-                <input
-                        name="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                        placeholder="Hasło"
-                />
-                <input
-                        name="telephone"
-                        value={formData.telephone}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                        placeholder="Telefon"
-                />
-                <button
-                        type="submit"
-                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    Dodaj
-                </button>
-            </form>
+                <h2 className="text-xl font-bold mb-4 text-gray-900">Dodaj użytkownika</h2>
+                <div className="grid gap-4">
+                    <input
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder="Imię"
+                            className="p-2 border rounded"
+                    />
+                    <input
+                            name="last_name"
+                            value={formData.last_name}
+                            onChange={handleChange}
+                            placeholder="Nazwisko"
+                            className="p-2 border rounded"
+                    />
+                    <input
+                            name="age"
+                            value={formData.age}
+                            onChange={handleChange}
+                            placeholder="Wiek"
+                            type="number"
+                            className="p-2 border rounded"
+                    />
+                    <input
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder="Email"
+                            className="p-2 border rounded"
+                    />
+                    <input
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            placeholder="Nazwa użytkownika"
+                            className="p-2 border rounded"
+                    />
+                    <input
+                            name="telephone"
+                            value={formData.telephone}
+                            onChange={handleChange}
+                            placeholder="Telefon"
+                            className="p-2 border rounded"
+                    />
+                    <input
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="Hasło"
+                            type="password"
+                            className="p-2 border rounded"
+                    />
+                    <button
+                            type="submit"
+                            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                    >
+                        Dodaj użytkownika
+                    </button>
+                </div>
+            </motion.form>
     );
 }
 

@@ -9,6 +9,8 @@ export const getUsers = async () => {
 // Pobiera użytkownika po ID
 export const getUserById = async (id) => {
     const response = await fetch(`${API_URL}/${id}`);
+
+
     return response.json();
 };
 

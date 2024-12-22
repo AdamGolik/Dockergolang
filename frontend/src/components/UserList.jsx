@@ -1,24 +1,23 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
-function UserList({onSelectUser}) {
-    const [users, setUsers] = useState([]);
+function UserList({ users = [], onSelectUser, showSkeleton = false }) {
+    const [allUsers, setAllUsers] = useState(users);
 
-    // Funkcja pobierająca użytkowników z backendu
-    const fetchUsers = async () => {
+    useEffect(() => {
+        if (!users.length) {
+            fetchAllUsers();
+        } else {
+            setAllUsers(users);
+        }
+    }, [users]);
+
+    const fetchAllUsers = async () => {
         try {
-            const response = await fetch("http://localhost:8080/"); // Komunikacja z backendem
+            const response = await fetch("http://localhost:8080/");
             if (response.ok) {
-                const data = await response.json(); // Parsowanie danych JSON
-                if (Array.isArray(data.users)) {
-                    const filteredUsers = data.users.map(user => ({
-                        id: user.Id,
-                        name: user.name,
-                        lastName: user.last_name
-                    })); // Wyciągnięcie tylko potrzebnych danych
-                    setUsers(filteredUsers); // Ustawienie danych do state
-                } else {
-                    console.error("Nieprawidłowe dane użytkownika:", data);
-                }
+                const data = await response.json();
+                setAllUsers(data.users);
             } else {
                 console.error("Błąd HTTP:", response.status);
             }
@@ -27,33 +26,27 @@ function UserList({onSelectUser}) {
         }
     };
 
-    useEffect(() => {
-        fetchUsers(); // Pobranie użytkowników przy załadowaniu komponentu
-    }, []);
-
     return (
-            <div className="bg-white shadow p-4 rounded-lg mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Lista użytkowników</h2>
-                <ul className="space-y-2">
-                    {Array.isArray(users) && users.length > 0 ? (
-                            users.map((user) => (
-                                    <li key={user.id}
-                                        className="flex justify-between items-center bg-gray-100 p-2 rounded">
-                            <span className="text-gray-700">
-                                {user.name} {user.lastName}
-                            </span>
-                                        <button
-                                                onClick={() => onSelectUser(user.id)}
-                                                className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
-                                        >
-                                            Wybierz
-                                        </button>
-                                    </li>
-                            ))
-                    ) : (
-                            <p className="text-gray-600 italic">Brak użytkowników do wyświetlenia.</p>
-                    )}
-                </ul>
+            <div className="grid gap-4">
+                {showSkeleton
+                        ? Array(4)
+                                .fill("")
+                                .map((_, idx) => (
+                                        <div
+                                                className="bg-gray-100 animate-pulse p-4 rounded shadow"
+                                                key={idx}
+                                        ></div>
+                                ))
+                        : allUsers.map((user) => (
+                                <motion.div
+                                        key={user.Id}
+                                        className="bg-gradient-to-tr from-blue-600 to-blue-400 p-4 rounded-lg text-white shadow-md hover:scale-105 transform transition duration-300"
+                                        onClick={() => onSelectUser(user.Id)}
+                                >
+                                    <h3 className="text-lg font-semibold">{`${user.name} ${user.last_name}`}</h3>
+                                    <p className="text-sm">Kliknij, aby zobaczyć szczegóły.</p>
+                                </motion.div>
+                        ))}
             </div>
     );
 }
