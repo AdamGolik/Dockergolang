@@ -1,29 +1,26 @@
-# Etap 1: Budowanie aplikacji z Node.js
-FROM node:20-alpine as builder
+# Użyj oficjalnego obrazu Node.js jako bazowego
+FROM node:18
 
+# Ustaw katalog roboczy w kontenerze
 WORKDIR /app
 
-# Kopiuj package.json i package-lock.json, aby zainstalować zależności
-COPY package.json package-lock.json ./
+# Skopiuj pliki package.json i package-lock.json
+COPY package*.json ./
 
-# Instalacja zależności
+# Zainstaluj zależności
 RUN npm install
 
-# Skopiowanie całego projektu (w tym src i index.html)
+# Skopiuj resztę plików aplikacji do kontenera
 COPY . .
 
-# Budowanie aplikacji
+# Zbuduj aplikację Next.js
 RUN npm run build
 
-# Etap 2: Serwowanie aplikacji za pomocą NGINX
-FROM nginx:alpine
+# Ustaw zmienną środowiskową, aby dowiedzieć się, że to środowisko produkcyjne
+ENV NODE_ENV=production
 
-WORKDIR /usr/share/nginx/html
+# Eksponuj port 3000
+EXPOSE 3000
 
-# Zbudowane pliki są kopiowane z pierwszego etapu
-COPY --from=builder /app/dist .
-
-# Eksponuj port dla serwera NGINX
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Uruchom aplikację Next.js
+CMD ["npm", "start"]

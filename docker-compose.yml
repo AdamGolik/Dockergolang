@@ -49,6 +49,7 @@ services:
       - ./frontend:/app
     stdin_open: true
     tty: true
+    #app
 volumes:
   postgres_data:
 
