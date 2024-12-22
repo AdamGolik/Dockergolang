@@ -1,22 +1,29 @@
-   FROM node:18
+# Etap 1: Budowanie aplikacji z Node.js
+FROM node:20-alpine as builder
 
-# Ustaw katalog roboczy
 WORKDIR /app
 
-# Skopiuj plik package.json i package-lock.json
-COPY package*.json ./
+# Kopiuj package.json i package-lock.json, aby zainstalować zależności
+COPY package.json package-lock.json ./
 
-# Zainstaluj zależności
+# Instalacja zależności
 RUN npm install
 
-# Skopiuj resztę plików aplikacji
+# Skopiowanie całego projektu (w tym src i index.html)
 COPY . .
 
-# Zbuduj aplikację
+# Budowanie aplikacji
 RUN npm run build
 
-# Eksponuj port
-EXPOSE 3000
+# Etap 2: Serwowanie aplikacji za pomocą NGINX
+FROM nginx:alpine
 
-# Uruchom serwer Next.js
-CMD ["npm", "run", "start"]
+WORKDIR /usr/share/nginx/html
+
+# Zbudowane pliki są kopiowane z pierwszego etapu
+COPY --from=builder /app/dist .
+
+# Eksponuj port dla serwera NGINX
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
