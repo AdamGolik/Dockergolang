@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
+import {use} from "react";
 import sha256 from "crypto-js/sha256";
-import { GetAllData } from "@/components/GetAllData";
+import {GetAllData} from "@/components/GetAllData";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +19,8 @@ type User = {
     password: string;
 };
 
-export default function Home({ params }: { params: { id: string } }) {
-    const { id } = params; // Pobranie ID z parametrów
+export default function Home({params}: { params: Promise<{ id: string }> }) {
+    const {id} = use(params); // Unwrap params with React.use()
     const [user, setUser] = useState<User | null>(null); // Stan użytkownika
     const [loading, setLoading] = useState<boolean>(true); // Stan ładowania
     const [error, setError] = useState<string | null>(null); // Stan błędów
@@ -96,8 +97,8 @@ export default function Home({ params }: { params: { id: string } }) {
 
     // Funkcja obsługująca zmiany w formularzu edycji
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setEditedUser((prev) => (prev ? { ...prev, [name]: value } : null));
+        const {name, value} = e.target;
+        setEditedUser((prev) => (prev ? {...prev, [name]: value} : null));
     };
 
     if (loading)
@@ -126,7 +127,7 @@ export default function Home({ params }: { params: { id: string } }) {
                 <div className="flex flex-row min-h-screen bg-gray-100">
                     {/* Lewa sekcja z komponentem GetAllData */}
                     <div className="w-1/4 bg-white p-4 shadow-lg">
-                        <GetAllData />
+                        <GetAllData/>
                     </div>
 
                     {/* Środkowa sekcja szczegółów */}
